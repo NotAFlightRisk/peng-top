@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -83,7 +84,8 @@ func TestListAgreesWithGopsutilAboutUs(t *testing.T) {
 	if us.rss < mem.RSS/2 || us.rss > mem.RSS*2 {
 		t.Errorf("rss %d, gopsutil says %d", us.rss, mem.RSS)
 	}
-	if us.threads < 1 || us.state != "running" {
+	// linux reports the main thread's state, which is asleep in a test
+	if us.threads < 1 || us.state == "" || runtime.GOOS != "linux" && us.state != "running" {
 		t.Errorf("threads %d, state %q", us.threads, us.state)
 	}
 	if name := r.describe(ctx, us).name; !strings.HasPrefix(name, "collect.test") {
