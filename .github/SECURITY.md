@@ -18,8 +18,8 @@ Anyone who can reach it can see everything it shows, though, and that includes y
 
 - It listens on `127.0.0.1` by default. Binding to anything else (like the Docker image does) is your call, so put it behind a firewall, a VPN or a reverse proxy
 - Set `PENGTOP_AUTH=user:pass` (or `--auth`) for basic auth, and only send that over HTTPS
-- While it's bound to localhost, it only answers requests whose `Host` header is `localhost`, `127.0.0.1`, `[::1]` or one you've listed in `PENGTOP_ALLOWED_HOSTS`. That stops a random web page using DNS rebinding to read it from your browser
-- The Docker image runs as root with the host's filesystem mounted read-only at `/host`, because reading other users' processes needs it. If you'd rather not, drop `--pid host` and the `/host` mount and it'll only see the container
+- Unless you've set a login, it only answers requests whose `Host` header is an IP address, `localhost`, the machine's own name or one you've listed in `PENGTOP_ALLOWED_HOSTS`. That stops a random web page using DNS rebinding to read it from your browser (with a login set, the browser won't hand it over anyway)
+- The Docker image runs as root with the host's filesystem mounted read-only at `/host`, because reading other users' processes needs it. If you'd rather not, drop the `/host` mount (and `--pid host`) and it'll only see the container
 
 A bug in any of those (a way round auth or the `Host` check, a write path, reading files outside what's shown) is a vulnerability. Seeing your own processes after you've exposed it to the internet without auth isn't.
 
