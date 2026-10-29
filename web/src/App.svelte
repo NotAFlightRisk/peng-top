@@ -241,10 +241,6 @@
     align-content: start;
     padding: 1lh 2ch;
     min-width: 0;
-
-    &:has(> :global(.overview)) {
-      align-content: stretch;
-    }
   }
 
   .waiting {

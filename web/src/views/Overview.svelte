@@ -61,7 +61,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 46ch), 1fr));
     grid-auto-flow: row dense;
-    grid-auto-rows: minmax(min-content, 1fr);
     gap: 1.25lh 2ch;
     container-type: inline-size;
   }
