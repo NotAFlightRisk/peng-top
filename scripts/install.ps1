@@ -2,7 +2,8 @@
 $ErrorActionPreference = 'Stop'
 
 $repo = 'NotAFlightRisk/peng-top'
-$arch = switch ($env:PROCESSOR_ARCHITECTURE) {
+$cpu = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
+$arch = switch ($cpu) {
   'AMD64' { 'amd64' }
   'ARM64' { 'arm64' }
   default { throw "No build for $_ yet, grab one from https://github.com/$repo/releases" }

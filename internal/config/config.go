@@ -73,7 +73,7 @@ func Parse(args []string, usage io.Writer) (Config, error) {
 	}
 
 	for _, h := range strings.Split(allowed, ",") {
-		if h = strings.TrimSpace(h); h != "" {
+		if h = strings.TrimSuffix(strings.TrimSpace(h), "."); h != "" {
 			c.AllowedHosts = append(c.AllowedHosts, strings.ToLower(h))
 		}
 	}

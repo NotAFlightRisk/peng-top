@@ -10,7 +10,7 @@ import (
 func TestFlagsBeatEnvAndEnvBeatsDefaults(t *testing.T) {
 	t.Setenv("PENGTOP_PORT", "9000")
 	t.Setenv("PENGTOP_INTERVAL", "5s")
-	t.Setenv("PENGTOP_ALLOWED_HOSTS", " Box.Local , ,nas")
+	t.Setenv("PENGTOP_ALLOWED_HOSTS", " Box.Local , ,nas.")
 	c, err := Parse([]string{"--port", "9100"}, io.Discard)
 	if err != nil {
 		t.Fatal(err)
