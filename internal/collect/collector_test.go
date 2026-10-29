@@ -30,13 +30,13 @@ func TestClockSpeedAveragesEachCoresCurrentClock(t *testing.T) {
 		}
 	}
 	r := &cpuReader{env: Env{Root: root}}
-	cores := []cpu.TimesStat{{CPU: "cpu0"}, {CPU: "cpu1"}}
+	cores := []cpu.TimesStat{{CPU: "cpu0"}, {CPU: "cpu1"}, {CPU: "cpu2"}}
 	write("proc/cpuinfo", "cpu MHz\t\t: 1000.000\nflags\t\t: fpu\ncpu MHz\t\t: 3000.000\n")
 	if got := r.mhz(cores); got != 2000 {
 		t.Errorf("got %v MHz from cpuinfo, want 2000", got)
 	}
 	write("sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", "800000\n")
-	write("sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq", "4000000\n")
+	write("sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq", "4000000\n")
 	if got := r.mhz(cores); got != 2400 {
 		t.Errorf("got %v MHz from cpufreq, want 2400", got)
 	}

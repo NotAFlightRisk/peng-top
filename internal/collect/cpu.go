@@ -1,7 +1,6 @@
 package collect
 
 import (
-	"cmp"
 	"context"
 	"errors"
 	"os"
@@ -96,10 +95,10 @@ func (r *cpuReader) mhz(cores []cpu.TimesStat) float64 {
 			sum, n = sum+v/perMHz, n+1
 		}
 	}
-	for _, core := range cores {
+	for i, core := range cores {
 		khz, err := os.ReadFile(r.env.HostPath("/sys/devices/system/cpu/" + core.CPU +
 			"/cpufreq/scaling_cur_freq"))
-		if err != nil {
+		if err != nil && i == 0 {
 			break
 		}
 		add(string(khz), 1000)
@@ -123,7 +122,10 @@ func (r *cpuReader) ownShare(c *CPU, elapsed float64) {
 	}
 	before := r.own
 	r.own = now
-	cores := cmp.Or(c.Quota, float64(runtime.NumCPU()))
+	cores := float64(runtime.NumCPU())
+	if c.Quota > 0 {
+		cores = min(cores, c.Quota)
+	}
 	share := func(key string) pct {
 		return clampPct(float64(rate(now[key], before[key], elapsed)) / 1e4 / cores)
 	}
