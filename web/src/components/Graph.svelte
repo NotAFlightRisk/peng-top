@@ -18,7 +18,7 @@
   } = $props()
 
   let canvas = $state<HTMLCanvasElement>()
-  let probe = $state<HTMLSpanElement>()
+  let cell = $state<DOMRectReadOnly>()
   let size = $state<DOMRectReadOnly>()
 
   const ceiling = $derived(max ?? niceMax(Math.max(1, ...series.flat()), settings.binary ? 1024 : 1000))
@@ -45,20 +45,20 @@
   }
 
   $effect(() => {
-    if (!canvas || !probe || !size?.width) return
+    if (!canvas || !cell?.width || !size?.width) return
     const box = size
     void settings.theme
     void settings.graph
     const dpr = devicePixelRatio || 1
-    canvas.width = Math.round(box.width * dpr)
-    canvas.height = Math.round(box.height * dpr)
+    const width = Math.round(box.width * dpr)
+    const height = Math.round(box.height * dpr)
+    if (canvas.width !== width || canvas.height !== height) Object.assign(canvas, { width, height })
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    ctx.scale(dpr, dpr)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, box.width, box.height)
 
     const ink = colours(canvas)
-    const cell = probe.getBoundingClientRect()
     const step = { x: cell.width / 2, y: cell.height / 4 }
     const lanes = mirror ? series.slice(0, 2) : series
     const laneHeight = mirror ? box.height / 2 : box.height
@@ -125,7 +125,7 @@
 <div class="graph" bind:contentRect={size} role="img" aria-label={label}>
   <canvas bind:this={canvas} aria-hidden="true"></canvas>
   {#if scale}<span class="graph-scale" aria-hidden="true">{mirror ? '±' : ''}{scale(ceiling)}</span>{/if}
-  <span class="graph-probe" bind:this={probe} aria-hidden="true"></span>
+  <span class="graph-probe" bind:contentRect={cell} aria-hidden="true"></span>
 </div>
 
 <style>

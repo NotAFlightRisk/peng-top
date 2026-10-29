@@ -43,7 +43,7 @@ class Stream {
     const source = new EventSource('api/stream')
     this.#source = source
     source.addEventListener('history', (e) => {
-      this.history = parse<Snapshot[]>(e.data) ?? []
+      this.history = (parse<Snapshot[]>(e.data) ?? []).slice(-keep)
       this.latest = this.history.at(-1) ?? null
       this.status = 'live'
       log('debug', `connected, ${this.history.length} readings of history`)
