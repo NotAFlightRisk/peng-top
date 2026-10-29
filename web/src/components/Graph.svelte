@@ -128,6 +128,7 @@
     position: relative;
     flex: 1 0 auto;
     block-size: var(--graph-height, 5lh);
+    max-block-size: 18lh;
     min-width: 0;
     background: var(--surface-sunken);
     border-radius: var(--radius);
