@@ -29,6 +29,7 @@ type Snapshot struct {
 	Procs   *Procs   `json:"procs,omitempty"`
 }
 
+// source is one reader, handed the seconds since it last read cleanly
 type source struct {
 	area string
 	read func(ctx context.Context, s *Snapshot, elapsed float64) error
@@ -37,6 +38,7 @@ type source struct {
 type Collector struct {
 	interval time.Duration
 	sources  []source
+	lastGood map[string]time.Time
 	keep     int
 
 	mu      sync.RWMutex
@@ -50,6 +52,7 @@ func New(env Env, interval time.Duration, keep int) *Collector {
 		interval: interval,
 		keep:     keep,
 		subs:     map[chan []byte]struct{}{},
+		lastGood: map[string]time.Time{},
 		sources: []source{
 			{"cpu", (&cpuReader{env: env}).read},
 			{"memory", (&memReader{env: env, swap: every[*mem.SwapMemoryStat]{period: 10 * time.Second}}).read},
@@ -64,26 +67,31 @@ func New(env Env, interval time.Duration, keep int) *Collector {
 
 // Run takes readings until ctx is done. The first one only primes the counters
 func (c *Collector) Run(ctx context.Context) {
-	last := time.Now()
-	c.sample(ctx, 0, false)
+	c.sample(ctx, false)
 	tick := time.NewTicker(c.interval)
 	defer tick.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case now := <-tick.C:
-			c.sample(ctx, now.Sub(last).Seconds(), true)
-			last = now
+		case <-tick.C:
+			c.sample(ctx, true)
 		}
 	}
 }
 
-func (c *Collector) sample(ctx context.Context, elapsed float64, publish bool) {
+func (c *Collector) sample(ctx context.Context, publish bool) {
 	started := time.Now()
 	s := Snapshot{Time: started.UnixMilli()}
 	for _, src := range c.sources {
-		logx.Check(src.area, safely(func() error { return src.read(ctx, &s, elapsed) }))
+		now := time.Now()
+		var elapsed float64
+		if last, ok := c.lastGood[src.area]; ok {
+			elapsed = now.Sub(last).Seconds()
+		}
+		if !logx.Check(src.area, safely(func() error { return src.read(ctx, &s, elapsed) })) {
+			c.lastGood[src.area] = now
+		}
 	}
 	if !publish {
 		return
