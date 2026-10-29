@@ -14,7 +14,9 @@
   const speed = (n: number) => rate(n, settings.binary, settings.bits)
   const size = (n: number) => bytes(n, settings.binary)
   const pick = (s: Snapshot, key: 'rx' | 'tx', name?: string) =>
-    sum(visibleNics(s.net, settings.showVirtual).filter((n) => !name || n.name === name).map((n) => n[key]))
+    name
+      ? s.net?.find((n) => n.name === name)?.[key]
+      : sum(visibleNics(s.net, settings.showVirtual).map((n) => n[key]))
   const traffic = (name?: string) => [
     series(stream.history, (s) => pick(s, 'rx', name)),
     series(stream.history, (s) => pick(s, 'tx', name)),

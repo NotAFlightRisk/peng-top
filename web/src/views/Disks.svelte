@@ -14,7 +14,7 @@
   const io = $derived(stream.latest?.disks?.io ?? [])
   const size = (n: number) => bytes(n, settings.binary)
   const speed = (n: number) => rate(n, settings.binary)
-  const used = (m: { used: number; total: number }) => (m.used / m.total) * 100
+  const used = (m: { used: number; free: number }) => (m.used / (m.used + m.free)) * 100
   const ioHistory = (name: string, key: 'read' | 'write') =>
     series(stream.history, (s) => s.disks?.io?.find((d) => d.name === name)?.[key])
 </script>

@@ -28,7 +28,7 @@
     aria-valuemax={100}
     aria-valuenow={Math.round(fill)}
   >
-    <span class="meter-fill" style:inline-size="{fill}%"></span>
+    <span class="meter-fill" style:clip-path="inset(0 {100 - fill}% 0 0)"></span>
   </span>
   <span class="meter-value">{detail ?? `${Math.round(value)}%`}</span>
   {@render extra?.()}
@@ -69,8 +69,8 @@
 
   .meter-fill {
     position: absolute;
-    inset: 0 auto 0 0;
-    transition: inline-size 0.6s var(--ease);
+    inset: 0;
+    transition: clip-path 0.6s var(--ease);
   }
 
   .tone-load .meter-fill {

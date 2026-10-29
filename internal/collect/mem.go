@@ -47,28 +47,39 @@ func (r *memReader) read(ctx context.Context, s *Snapshot, _ float64) error {
 	return nil
 }
 
-// applyCgroup swaps in a cgroup v2 container's own limit and usage, when it has one
+// applyCgroup swaps in a cgroup v2 container's own usage, and its limit when it has one
 func applyCgroup(m *Mem) {
-	limit, err1 := readCgroupNumber("memory.max")
-	used, err2 := readCgroupNumber("memory.current")
-	if err1 != nil || err2 != nil || limit == 0 || limit >= m.Total {
+	used, err := readCgroupNumber("memory.current")
+	if err != nil {
 		return
 	}
-	m.Limit, m.Used = limit, used
-	m.Available = limit - min(used, limit)
-	m.Free, m.Buffers, m.Cached = m.Available, 0, cgroupStat("file")
-}
-
-// cgroupStat pulls one counter out of memory.stat, 0 if it isn't there
-func cgroupStat(key string) uint64 {
-	raw, _ := os.ReadFile("/sys/fs/cgroup/memory.stat")
-	for _, line := range strings.Split(string(raw), "\n") {
-		if name, value, ok := strings.Cut(line, " "); ok && name == key {
-			n, _ := strconv.ParseUint(value, 10, 64)
-			return n
+	stat := cgroupStats("memory.stat")
+	// used leaves out inactive page cache, the same as docker stats
+	m.Used = used - min(stat["inactive_file"], used)
+	m.Buffers, m.Cached = 0, stat["file"]
+	if limit, _ := readCgroupNumber("memory.max"); limit > 0 && limit < m.Total {
+		m.Limit = limit
+		m.Available = limit - min(m.Used, limit)
+		m.Free = m.Available
+	}
+	if swap, err := readCgroupNumber("memory.swap.current"); err == nil {
+		m.SwapUsed = swap
+		if allowed, _ := readCgroupNumber("memory.swap.max"); allowed > 0 {
+			m.SwapTotal = min(allowed, m.SwapTotal)
 		}
 	}
-	return 0
+}
+
+// cgroupStats reads a cgroup file of "key value" lines, like memory.stat
+func cgroupStats(name string) map[string]uint64 {
+	raw, _ := os.ReadFile("/sys/fs/cgroup/" + name)
+	stats := map[string]uint64{}
+	for _, line := range strings.Split(string(raw), "\n") {
+		if key, value, ok := strings.Cut(line, " "); ok {
+			stats[key], _ = strconv.ParseUint(value, 10, 64)
+		}
+	}
+	return stats
 }
 
 func readCgroupNumber(name string) (uint64, error) {
