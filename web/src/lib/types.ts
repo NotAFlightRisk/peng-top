@@ -38,7 +38,7 @@ export interface DiskIO {
   write: number
   readOps: number
   writeOps: number
-  busy: number
+  busy?: number
   readTotal: number
   writeTotal: number
 }

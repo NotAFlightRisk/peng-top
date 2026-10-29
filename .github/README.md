@@ -51,7 +51,7 @@ It installs to `%LOCALAPPDATA%\peng-top` and adds that to your user `PATH`, so o
 docker run -d --name peng-top --pid host --network host -v /:/host:ro,rslave ghcr.io/notaflightrisk/peng-top
 ```
 
-Then open [localhost:7340](http://localhost:7340). Those three flags are what let it see the host rather than its own container: `--pid host` for the processes, `--network host` for the network, and the read-only `/` mount for disks, sensors and the rest. Drop them and it still runs, it just shows the container (and says so in the top bar).
+Then open [localhost:7340](http://localhost:7340). Those three flags are what let it see the host rather than its own container: `--pid host` for the processes, `--network host` for the network, and the read-only `/` mount for disks, sensors and the rest. Without the mount it still runs, it just shows the container (and says so in the top bar). Without `--network host` the network numbers are the container's, and the System tab says so.
 
 Prefer Compose? There's a ready-made [`docker/compose.yaml`](../docker/compose.yaml):
 
@@ -146,7 +146,7 @@ WantedBy=default.target
 
 Then `systemctl --user enable --now peng-top`, plus `sudo loginctl enable-linger $USER` if you want it running while you're logged out. Swap the `ExecStart` path for `/usr/local/bin/peng-top` if that's where it went. On a box that mounts `/proc` with `hidepid`, it'll only see your own processes unless it runs as root.
 
-On macOS and Windows, Docker or a login item is the easy route.
+On macOS a login item does the same job, and on Windows a Task Scheduler task set to run at log on.
 
 ---
 
@@ -156,7 +156,7 @@ On macOS and Windows, Docker or a login item is the easy route.
 
 **"peng-top doesn't know ..."** means you've reached it by a hostname it doesn't recognise, see `--allowed-hosts` above.
 
-**The top bar says "container"** when you wanted the host: you're missing `--pid host`, `--network host` or the `/:/host` mount.
+**The top bar says "container"** when you wanted the host: the `/:/host` mount is missing. If it says "host via container" but the network looks wrong, add `--network host`.
 
 **Something else?** Run it with `--log-level debug` and [open an issue](https://github.com/NotAFlightRisk/peng-top/issues/new?template=bug_report.yml) with what it prints.
 

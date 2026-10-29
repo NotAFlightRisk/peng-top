@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"math"
 	"strconv"
@@ -79,7 +80,7 @@ func (c *Collector) sample(ctx context.Context, elapsed float64, publish bool) {
 	started := time.Now()
 	s := Snapshot{Time: started.UnixMilli()}
 	for _, src := range c.sources {
-		logx.Check(src.area, src.read(ctx, &s, elapsed))
+		logx.Check(src.area, safely(func() error { return src.read(ctx, &s, elapsed) }))
 	}
 	if !publish {
 		return
@@ -108,6 +109,16 @@ func (c *Collector) sample(ctx context.Context, elapsed float64, publish bool) {
 	c.mu.Unlock()
 	slog.Debug("reading taken", "took", time.Since(started).Round(time.Millisecond),
 		"bytes", len(full))
+}
+
+// safely turns a panic in one reader into an error, so the rest keep going
+func safely(read func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("fell over reading it: %v", r)
+		}
+	}()
+	return read()
 }
 
 // Latest is the newest full reading, or nil before the first one

@@ -52,3 +52,21 @@ func TestSubscribersGetHistoryThenNewReadings(t *testing.T) {
 		t.Fatalf("history grew past its cap to %d", len(c.history))
 	}
 }
+
+func TestOnlyLoopbackNamesCountAsLoopback(t *testing.T) {
+	for name, want := range map[string]bool{
+		"lo": true, "lo0": true, "Local Area Connection": false, "eth0": false,
+		"veth1a2b": true, "Loopback Pseudo-Interface 1": true,
+	} {
+		if got := isVirtual(name); got != want {
+			t.Errorf("%s: got %v, want %v", name, got, want)
+		}
+	}
+}
+
+func TestAPanickingReaderBecomesAnError(t *testing.T) {
+	err := safely(func() error { panic("boom") })
+	if err == nil {
+		t.Fatal("the panic got swallowed")
+	}
+}

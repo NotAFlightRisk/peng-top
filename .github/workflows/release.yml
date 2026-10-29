@@ -44,6 +44,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
         run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 ||
           gh release create "$TAG" \
             --title "$TAG" \
             --generate-notes \

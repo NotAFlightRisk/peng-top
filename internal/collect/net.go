@@ -24,7 +24,7 @@ type NIC struct {
 }
 
 var virtualPrefixes = []string{
-	"lo", "veth", "docker", "br-", "virbr", "vnet", "cni", "flannel", "cali", "tap", "utun",
+	"veth", "docker", "br-", "virbr", "vnet", "cni", "flannel", "cali", "tap", "utun",
 	"awdl", "llw", "anpi", "gif", "stf", "bridge", "ap1", "isatap", "teredo",
 }
 
@@ -76,6 +76,9 @@ func (r *netReader) read(ctx context.Context, s *Snapshot, elapsed float64) erro
 
 func isVirtual(name string) bool {
 	lower := strings.ToLower(name)
+	if strings.TrimRight(lower, "0123456789") == "lo" {
+		return true
+	}
 	for _, p := range virtualPrefixes {
 		if strings.HasPrefix(lower, p) {
 			return true

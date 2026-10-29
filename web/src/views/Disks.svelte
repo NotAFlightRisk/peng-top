@@ -70,7 +70,7 @@
 
   {#if !compact}
     {#each io as d (d.name)}
-      {#snippet ioNote()}<span>{pct(d.busy)} busy</span>{/snippet}
+      {#snippet ioNote()}{#if d.busy !== undefined}<span>{pct(d.busy)} busy</span>{/if}{/snippet}
       <Panel title={d.name} aside={ioNote}>
         <Graph
           series={[ioHistory(d.name, 'read'), ioHistory(d.name, 'write')]}
@@ -83,7 +83,9 @@
           <span class="key-b">write {speed(d.write)}</span>
           <span class="muted">{Math.round(d.readOps + d.writeOps)} ops/s</span>
         </p>
-        <Meter label="busy" value={d.busy} detail={pct(d.busy)} />
+        {#if d.busy !== undefined}
+          <Meter label="busy" value={d.busy} detail={pct(d.busy)} />
+        {/if}
         <p class="muted">{size(d.readTotal)} read, {size(d.writeTotal)} written since boot</p>
       </Panel>
     {:else}

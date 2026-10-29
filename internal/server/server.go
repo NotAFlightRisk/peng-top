@@ -133,7 +133,7 @@ func (s *Server) guard(next http.Handler) http.Handler {
 		if h, _, err := net.SplitHostPort(host); err == nil {
 			host = h
 		}
-		host = strings.Trim(host, "[]")
+		host = strings.TrimSuffix(strings.Trim(host, "[]"), ".")
 		if net.ParseIP(host) == nil && !s.hosts[host] && !strings.HasSuffix(host, ".localhost") {
 			slog.Warn("turned away an unknown hostname", "host", host,
 				"fix", "add it to --allowed-hosts / "+config.EnvName("allowed-hosts"))

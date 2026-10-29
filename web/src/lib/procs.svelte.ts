@@ -40,7 +40,9 @@ export function rows(list: Proc[], showKernel: boolean): Row[] {
   const children = new Map<number, Proc[]>()
   for (const p of visible) {
     const parent = pids.has(p.ppid) && p.ppid !== p.pid ? p.ppid : 0
-    children.set(parent, [...(children.get(parent) ?? []), p])
+    const siblings = children.get(parent)
+    if (siblings) siblings.push(p)
+    else children.set(parent, [p])
   }
   const out: Row[] = []
   const walk = (parent: number, depth: number) => {

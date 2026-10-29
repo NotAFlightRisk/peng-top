@@ -52,6 +52,19 @@ func applyCgroup(m *Mem) {
 	}
 	m.Limit, m.Used = limit, used
 	m.Available = limit - min(used, limit)
+	m.Free, m.Buffers, m.Cached = m.Available, 0, cgroupStat("file")
+}
+
+// cgroupStat pulls one counter out of memory.stat, 0 if it isn't there
+func cgroupStat(key string) uint64 {
+	raw, _ := os.ReadFile("/sys/fs/cgroup/memory.stat")
+	for _, line := range strings.Split(string(raw), "\n") {
+		if name, value, ok := strings.Cut(line, " "); ok && name == key {
+			n, _ := strconv.ParseUint(value, 10, 64)
+			return n
+		}
+	}
+	return 0
 }
 
 func readCgroupNumber(name string) (uint64, error) {

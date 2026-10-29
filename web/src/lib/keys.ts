@@ -57,6 +57,8 @@ export function onKey(e: KeyboardEvent) {
     return
   }
   if (typing(e.target)) return
+  const pressing = e.target instanceof HTMLElement && e.target.closest('button, a, summary')
+  if (pressing && (e.key === ' ' || e.key === 'Enter')) return
 
   const key = e.key === ' ' ? 'Space' : e.key
   const procs = nav.view === 'processes' || nav.view === 'overview'

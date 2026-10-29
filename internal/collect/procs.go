@@ -2,6 +2,7 @@ package collect
 
 import (
 	"bufio"
+	"cmp"
 	"context"
 	"os"
 	"os/user"
@@ -69,7 +70,7 @@ func (r *procReader) read(ctx context.Context, s *Snapshot, elapsed float64) err
 	}
 	var memTotal float64
 	if s.Mem != nil {
-		memTotal = float64(s.Mem.Total)
+		memTotal = float64(cmp.Or(s.Mem.Limit, s.Mem.Total))
 	}
 
 	known := make(map[int32]tracked, len(raws))

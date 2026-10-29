@@ -32,7 +32,7 @@ type DiskIO struct {
 	Write      perSec `json:"write"`
 	ReadOps    perSec `json:"readOps"`
 	WriteOps   perSec `json:"writeOps"`
-	Busy       pct    `json:"busy"`
+	Busy       *pct   `json:"busy,omitempty"`
 	ReadTotal  uint64 `json:"readTotal"`
 	WriteTotal uint64 `json:"writeTotal"`
 }
@@ -108,7 +108,7 @@ func (r *diskIOReader) read(ctx context.Context, s *Snapshot, elapsed float64) e
 			Write:      rate(c.WriteBytes, before.WriteBytes, elapsed),
 			ReadOps:    rate(c.ReadCount, before.ReadCount, elapsed),
 			WriteOps:   rate(c.WriteCount, before.WriteCount, elapsed),
-			Busy:       clampPct(float64(rate(c.IoTime, before.IoTime, elapsed)) / 10),
+			Busy:       busyShare(c.IoTime, before.IoTime, elapsed),
 			ReadTotal:  c.ReadBytes,
 			WriteTotal: c.WriteBytes,
 		})
@@ -120,6 +120,15 @@ func (r *diskIOReader) read(ctx context.Context, s *Snapshot, elapsed float64) e
 	}
 	s.Disks.IO = out
 	return nil
+}
+
+// busyShare only means anything on linux, where io_ticks is wall time the disk spent busy
+func busyShare(now, before uint64, elapsed float64) *pct {
+	if runtime.GOOS != "linux" {
+		return nil
+	}
+	busy := clampPct(float64(rate(now, before, elapsed)) / 10)
+	return &busy
 }
 
 // wholeDisk drops partitions and loop/ram devices on linux, so a disk isn't counted twice

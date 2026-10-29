@@ -1,10 +1,13 @@
 package collect
 
 import (
+	"errors"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/NotAFlightRisk/peng-top/internal/logx"
 )
 
 // Mode says whose numbers you're looking at
@@ -41,8 +44,8 @@ func Detect(hostRoot string) Env {
 	os.Setenv("HOST_ROOT", hostRoot)
 	os.Setenv("HOST_PROC_MOUNTINFO", filepath.Join(hostRoot, "proc", "1", "mountinfo"))
 	if !sameNetwork(hostRoot) {
-		slog.Warn("not on the host's network, so network numbers are the container's",
-			"fix", "run with --network host")
+		logx.Check("host network", errors.New("not on the host's network, so network numbers are "+
+			"the container's (run it with --network host)"))
 	}
 	return Env{Mode: ModeContainerHost, Root: hostRoot}
 }

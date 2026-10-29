@@ -2,12 +2,16 @@
 $ErrorActionPreference = 'Stop'
 
 $repo = 'NotAFlightRisk/peng-top'
-$arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'amd64' }
+$arch = switch ($env:PROCESSOR_ARCHITECTURE) {
+  'AMD64' { 'amd64' }
+  'ARM64' { 'arm64' }
+  default { throw "No build for $_ yet, grab one from https://github.com/$repo/releases" }
+}
 $tag = (Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest").tag_name
 $archive = "peng-top_${tag}_windows_$arch.zip"
 $url = "https://github.com/$repo/releases/download/$tag"
 $dir = "$env:LOCALAPPDATA\peng-top"
-$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP "peng-top-$tag") -Force
+$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ([IO.Path]::GetRandomFileName()))
 
 Write-Host "Downloading peng-top $tag for windows/$arch"
 Invoke-WebRequest "$url/$archive" -OutFile "$tmp\$archive"
