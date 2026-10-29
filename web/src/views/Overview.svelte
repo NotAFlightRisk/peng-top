@@ -15,7 +15,7 @@
     [...(procs?.list ?? [])]
       .filter((p) => settings.showKernel || !p.kernel)
       .sort((a, b) => b.cpu - a.cpu)
-      .slice(0, 8),
+      .slice(0, 15),
   )
   const cpuShare = (n: number) => (settings.cpuPerCore ? n : n / (stream.info?.threads || 1))
 </script>
@@ -74,6 +74,16 @@
     .overview :global(.graph) {
       --graph-height: 3lh;
       flex-grow: 0;
+    }
+
+    .top-procs tr:nth-child(n + 9) {
+      display: none;
+    }
+  }
+
+  @media (min-width: 112rem) {
+    .overview {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 

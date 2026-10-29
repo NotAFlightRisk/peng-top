@@ -21,12 +21,15 @@
   let probe = $state<HTMLSpanElement>()
   let size = $state<DOMRectReadOnly>()
 
-  const ceiling = $derived(max ?? niceMax(Math.max(1, ...series.flat())))
+  const ceiling = $derived(max ?? niceMax(Math.max(1, ...series.flat()), settings.binary ? 1024 : 1000))
 
-  // rounds up to 1, 2 or 5 times a power of ten, so the scale doesn't wobble every tick
-  function niceMax(peak: number) {
-    const step = 10 ** Math.floor(Math.log10(peak))
-    return [1, 2, 5, 10].map((m) => m * step).find((n) => n >= peak) ?? peak
+  // rounds up to 1, 2 or 5 times a power of ten in whatever unit it lands in, so the scale
+  // reads 50 KiB/s rather than 48.8, and doesn't wobble every tick
+  function niceMax(peak: number, base: number) {
+    const unit = base ** Math.floor(Math.log(peak) / Math.log(base))
+    const inUnit = peak / unit
+    const step = 10 ** Math.floor(Math.log10(inUnit))
+    return ([1, 2, 5, 10].map((m) => m * step).find((n) => n >= inUnit) ?? inUnit) * unit
   }
 
   function colours(el: HTMLElement) {

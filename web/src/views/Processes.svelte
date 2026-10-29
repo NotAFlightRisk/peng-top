@@ -101,8 +101,10 @@
                     class="proc-pick"
                     style:padding-inline-start="{p.depth * 2}ch"
                     onclick={() => (table.selected = p.pid)}
-                    >{#if p.depth}<span class="muted">└─ </span>{/if}{p.name}</button
-                  >{#if p.cmd}<span class="proc-cmd muted">{p.cmd}</span>{/if}
+                    >{#if p.depth}<span class="muted">└─ </span>{/if}{p.name}{#if p.cmd}<span
+                        class="proc-cmd muted">{p.cmd}</span
+                      >{/if}</button
+                  >
                 </td>
               </tr>
             {/each}
@@ -292,7 +294,11 @@
   }
 
   .proc-pick {
-    display: inline;
+    display: block;
+    inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .proc-cmd {

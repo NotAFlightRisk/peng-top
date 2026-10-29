@@ -32,6 +32,15 @@
 {/snippet}
 
 
+{#if !compact && stream.latest?.net}
+  <div class="network-tools">
+    <button class="toggle" aria-pressed={settings.showVirtual} onclick={() => (settings.showVirtual = !settings.showVirtual)}>
+      <span class="toggle-mark" aria-hidden="true">{settings.showVirtual ? '[x]' : '[ ]'}</span>
+      show virtual interfaces <span class="muted">(lo, docker, veth)</span>
+    </button>
+  </div>
+{/if}
+
 <div class="network-view" class:compact>
   {#if compact}
     <Panel title="network" hotkey="5">
@@ -52,12 +61,6 @@
   {:else if !stream.latest?.net}
     <Panel title="network"><Unavailable area="network" what="network readings" /></Panel>
   {:else}
-    <div class="network-tools">
-      <button class="toggle" aria-pressed={settings.showVirtual} onclick={() => (settings.showVirtual = !settings.showVirtual)}>
-        <span class="toggle-mark" aria-hidden="true">{settings.showVirtual ? '[x]' : '[ ]'}</span>
-        show virtual interfaces <span class="muted">(lo, docker, veth)</span>
-      </button>
-    </div>
     {#each nics as n (n.name)}
       {@render nicPanel(n)}
     {:else}
@@ -142,7 +145,7 @@
   }
 
   .network-tools {
-    grid-column: 1 / -1;
+    margin-bottom: 1lh;
   }
 
   .toggle {
