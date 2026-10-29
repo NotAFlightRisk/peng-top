@@ -1,0 +1,83 @@
+name: 🐛 Bug Report
+description: Something isn't working as expected
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report!
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead. A wrong or missing number? Say which panel, and what your OS's own tools show.
+      placeholder: I expected X, but Y happened.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of steps that reliably triggers it.
+      placeholder: |
+        1. Run 'peng-top --interval 1s'
+        2. Open the Disks tab
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `peng-top --version`, or the Docker tag.
+      placeholder: 1.2.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How are you running it?
+      options:
+        - Release binary
+        - Install script
+        - Docker
+        - Docker Compose
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS and architecture
+      description: Plus the browser, if it's a UI thing.
+      placeholder: Ubuntu 24.04 arm64, Firefox 141
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Debug log
+      description: Run it with `--log-level debug` and paste what it prints. Formatted as code automatically, so no backticks needed.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched existing issues for duplicates
+          required: true
+        - label: I am running the latest version
+          required: true
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/NotAFlightRisk/peng-top/blob/main/.github/CODE_OF_CONDUCT.md)
+          required: true

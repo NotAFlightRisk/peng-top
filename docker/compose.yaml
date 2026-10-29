@@ -1,0 +1,11 @@
+services:
+  peng-top:
+    image: ghcr.io/notaflightrisk/peng-top:latest
+    container_name: peng-top
+    restart: unless-stopped
+    pid: host
+    network_mode: host
+    volumes:
+      - /:/host:ro,rslave
+    environment:
+      PENGTOP_PORT: 7340

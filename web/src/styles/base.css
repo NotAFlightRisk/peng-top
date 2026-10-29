@@ -1,0 +1,140 @@
+@import '@fontsource-variable/jetbrains-mono';
+@import './themes.css';
+
+:root {
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  --font-size: 14px;
+  --line: 1.4;
+  --gap: 1ch;
+  --gap-y: 0.5lh;
+  --radius: 0;
+  --border-width: 1px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  &[data-size='s'] {
+    --font-size: 12px;
+  }
+
+  &[data-size='l'] {
+    --font-size: 16px;
+  }
+
+  &[data-corners='round'] {
+    --radius: 0.6ch;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font: var(--font-size) / var(--line) var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  background: var(--surface);
+  color: var(--text);
+  caret-color: var(--accent);
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--surface);
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--text);
+}
+
+:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 1px;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-size: inherit;
+  font-weight: 700;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.25em;
+}
+
+kbd {
+  font: inherit;
+  color: var(--accent);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
+/* legend swatches, so the series colours never have to pass as text */
+.key-a,
+.key-b {
+  display: inline-flex;
+  align-items: center;
+  gap: 1ch;
+
+  &::before {
+    content: '';
+    inline-size: 1ch;
+    block-size: 1ch;
+    background: var(--series-a);
+  }
+}
+
+.key-b::before {
+  background: var(--series-b);
+}
