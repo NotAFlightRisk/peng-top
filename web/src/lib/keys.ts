@@ -46,6 +46,15 @@ const sortKeys: Record<string, Parameters<typeof sortBy>[0]> = {
   c: 'cpu', m: 'mem', i: 'pid', n: 'name', u: 'user',
 }
 
+const scrollBy: Record<string, (el: HTMLElement) => number> = {
+  PageDown: (el) => el.clientHeight * 0.9,
+  PageUp: (el) => -el.clientHeight * 0.9,
+  ArrowDown: () => 40,
+  ArrowUp: () => -40,
+  Home: (el) => -el.scrollHeight,
+  End: (el) => el.scrollHeight,
+}
+
 const typing = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName))
 
@@ -73,6 +82,10 @@ export function onKey(e: KeyboardEvent) {
   } else if (procs && (key === 'j' || key === 'ArrowDown')) move(1)
   else if (procs && (key === 'k' || key === 'ArrowUp')) move(-1)
   else if (nav.view === 'processes' && sortKeys[key]) sortBy(sortKeys[key])
+  else if (scrollBy[key]) {
+    const screen = document.querySelector<HTMLElement>('.screen')
+    screen?.scrollBy({ top: scrollBy[key](screen) })
+  }
   else {
     const hit = bindings.find(
       (b) => b.keys.includes(key) && (!b.only || b.only === nav.view),
