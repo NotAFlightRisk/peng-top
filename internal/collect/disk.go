@@ -40,11 +40,15 @@ type DiskIO struct {
 // filesystems left off the list: snaps, squashfs images and friends
 var skipFS = []string{"squashfs", "overlay", "tmpfs", "devtmpfs", "iso9660", "nsfs", "tracefs"}
 
-type mountReader struct{ env Env }
+type mountReader struct {
+	env   Env
+	parts every[[]disk.PartitionStat]
+}
 
 func (r *mountReader) read(ctx context.Context, s *Snapshot, _ float64) error {
-	parts, err := disk.PartitionsWithContext(ctx, false)
+	parts, err := r.parts.get(func() ([]disk.PartitionStat, error) { return disk.PartitionsWithContext(ctx, false) })
 	if len(parts) == 0 {
+		r.parts.stale()
 		return errors.Join(err, errors.New("no filesystems found"))
 	}
 	seen := map[string]int{}

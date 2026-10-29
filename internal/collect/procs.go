@@ -35,6 +35,7 @@ type Procs struct {
 // rawProc is what each platform reads every time round
 type rawProc struct {
 	pid, ppid int32
+	name      string
 	started   int64
 	cpuSecs   float64
 	rss       uint64
@@ -58,6 +59,7 @@ type tracked struct {
 const maxCmd = 300
 
 type procReader struct {
+	procOS
 	env   Env
 	known map[int32]tracked
 	users map[uint32]string
@@ -78,7 +80,7 @@ func (r *procReader) read(ctx context.Context, s *Snapshot, elapsed float64) err
 	for _, raw := range raws {
 		t, ok := r.known[raw.pid]
 		if !ok || t.started != raw.started {
-			t = tracked{about: r.describe(ctx, raw.pid), started: raw.started, cpuSecs: raw.cpuSecs}
+			t = tracked{about: r.describe(ctx, raw), started: raw.started, cpuSecs: raw.cpuSecs}
 		}
 		p := Proc{
 			PID: raw.pid, PPID: raw.ppid, Name: t.name, User: t.user, Cmd: t.cmd,

@@ -1,4 +1,4 @@
-//go:build !linux
+//go:build !linux && !windows && !darwin
 
 package collect
 
@@ -7,6 +7,8 @@ import (
 
 	"github.com/shirou/gopsutil/v4/process"
 )
+
+type procOS struct{}
 
 func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 	all, err := process.ProcessesWithContext(ctx)
@@ -32,14 +34,4 @@ func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 		out = append(out, raw)
 	}
 	return out, nil
-}
-
-func (r *procReader) describe(ctx context.Context, pid int32) about {
-	p := &process.Process{Pid: pid}
-	var a about
-	a.name, _ = p.NameWithContext(ctx)
-	a.user, _ = p.UsernameWithContext(ctx)
-	cmd, _ := p.CmdlineWithContext(ctx)
-	a.cmd = clip(cmd)
-	return a
 }
