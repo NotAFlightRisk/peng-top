@@ -54,9 +54,9 @@ func applyCgroup(m *Mem) {
 		return
 	}
 	stat := cgroupStats("memory.stat")
-	// used leaves out inactive page cache, the same as docker stats
-	m.Used = used - min(stat["inactive_file"], used)
-	m.Buffers, m.Cached = 0, stat["file"]
+	// inactive page cache counts as cache and not used, the same as docker stats
+	cache := min(stat["inactive_file"], used)
+	m.Used, m.Buffers, m.Cached = used-cache, 0, cache
 	if limit, _ := readCgroupNumber("memory.max"); limit > 0 && limit < m.Total {
 		m.Limit = limit
 		m.Available = limit - min(m.Used, limit)

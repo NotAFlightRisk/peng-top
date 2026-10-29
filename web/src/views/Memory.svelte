@@ -7,6 +7,7 @@
   import { series } from '../lib/series'
   import { settings } from '../lib/settings.svelte'
   import { stream } from '../lib/stream.svelte'
+  import type { Mem } from '../lib/types'
 
   let { compact = false }: { compact?: boolean } = $props()
 
@@ -14,10 +15,12 @@
   const size = (n: number) => bytes(n, settings.binary)
   const total = $derived(mem ? mem.limit || mem.total : 1)
   const share = (n: number) => (n / total) * 100
+  const cache = (m: Mem) => m.cached + m.buffers
   const swapShare = $derived(mem?.swapTotal ? (mem.swapUsed / mem.swapTotal) * 100 : 0)
-  const usedHistory = $derived(
-    series(stream.history, (s) => s.mem && (s.mem.used / (s.mem.limit || s.mem.total)) * 100),
-  )
+  const overTime = (pick: (m: Mem) => number) =>
+    series(stream.history, (s) => s.mem && (pick(s.mem) / (s.mem.limit || s.mem.total)) * 100)
+  const usedHistory = $derived(overTime((m) => m.used))
+  const cacheHistory = $derived(overTime(cache))
   const swapHistory = $derived(
     series(stream.history, (s) => s.mem?.swapTotal && (s.mem.swapUsed / s.mem.swapTotal) * 100),
   )
@@ -33,10 +36,20 @@
 <div class="memory-view" class:compact>
   <Panel title="memory" hotkey={compact ? '3' : undefined} aside={summary} class="memory-main">
     {#if mem}
-      <Graph series={[usedHistory]} max={100} label="memory use over time, now {pct(share(mem.used))}" />
+      <Graph
+        series={[usedHistory, cacheHistory]}
+        max={100}
+        stack
+        label="memory over time, used with cache stacked on top, now {pct(share(mem.used))} used and {pct(share(cache(mem)))} cache"
+      />
       <Meter label="used" value={share(mem.used)} detail={size(mem.used)} />
-      <Meter label="cache" value={share(mem.cached + mem.buffers)} detail={size(mem.cached + mem.buffers)} tone="info" />
-      <Meter label="free" value={share(mem.available)} detail={size(mem.available)} tone="series-a" />
+      <Meter label="cache" value={share(cache(mem))} detail={size(cache(mem))} tone="info" />
+      <Meter
+        label="available"
+        value={share(mem.available)}
+        detail={size(mem.available)}
+        tone="series-a"
+      />
       {#if mem.swapTotal}
         <Meter label="swap" value={swapShare} detail={size(mem.swapUsed)} />
       {/if}
@@ -90,6 +103,10 @@
 
     &.compact {
       display: contents;
+    }
+
+    & :global(.memory-main .meter) {
+      --label-width: 9ch;
     }
 
     &:not(.compact) :global(.memory-main) {

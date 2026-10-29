@@ -1,5 +1,6 @@
 <script lang="ts">
   import { settings } from '../lib/settings.svelte'
+  import { sum } from '../lib/series'
 
   let {
     series,
@@ -7,6 +8,7 @@
     max,
     tone = 'load',
     mirror = false,
+    stack = false,
     scale,
   }: {
     series: number[][]
@@ -14,6 +16,7 @@
     max?: number
     tone?: 'load' | 'series'
     mirror?: boolean
+    stack?: boolean
     scale?: (n: number) => string
   } = $props()
 
@@ -21,7 +24,10 @@
   let cell = $state<DOMRectReadOnly>()
   let size = $state<DOMRectReadOnly>()
 
-  const ceiling = $derived(max ?? niceMax(Math.max(1, ...series.flat()), settings.binary ? 1024 : 1000))
+  const addUp = (layers: number[][]) =>
+    layers[0].map((_, i) => sum(layers.map((layer) => layer[i])))
+  const lanes = $derived(stack ? series.map((_, n) => addUp(series.slice(0, n + 1))) : series)
+  const ceiling = $derived(max ?? niceMax(Math.max(1, ...lanes.flat()), settings.binary ? 1024 : 1000))
 
   // rounds up to 1, 2 or 5 times a power of ten in the peak's display unit
   function niceMax(peak: number, base: number) {
@@ -40,6 +46,7 @@
       crit: read('--crit'),
       a: read('--series-a'),
       b: read('--series-b'),
+      info: read('--info'),
       faint: read('--border'),
     }
   }
@@ -61,31 +68,39 @@
 
     const ink = colours(canvas)
     const step = { x: cell.width / 2, y: cell.height / 4 }
-    const lanes = mirror ? series.slice(0, 2) : series
+    const columns = Math.floor(box.width / step.x)
     const laneHeight = mirror ? box.height / 2 : box.height
+    const rows = Math.floor(laneHeight / step.y)
+    const toRows = (v: number) => Math.round((Math.min(v, ceiling) / ceiling) * rows)
+    const drawn = mirror ? lanes.slice(0, 2) : lanes
+    // a stack gets topped up to the ceiling in faint ink, so you can see what's left
+    const layers = stack ? [...drawn, drawn[0].map(() => ceiling)] : drawn
     const shade = (lane: number, frac: number) => {
+      if (lane === drawn.length) return ink.faint
       if (tone === 'series') return lane === 0 ? ink.a : ink.b
+      if (lane > 0) return ink.info
       if (frac < 0.5) return ink.ok
       return frac < 0.8 ? ink.warn : ink.crit
     }
 
-    lanes.forEach((values, lane) => {
+    layers.forEach((values, lane) => {
       const down = mirror && lane === 1
       const base = mirror ? box.height / 2 : box.height
-      const columns = Math.floor(box.width / step.x)
       const shown = values.slice(-columns)
+      const floor = stack && lane ? layers[lane - 1].slice(-columns) : shown.map(() => 0)
       if (settings.graph === 'line') {
-        drawLine(ctx, shown, columns, step.x, base, laneHeight, down, shade(lane, 0.3))
+        drawLine(ctx, shown, floor, columns, step.x, base, laneHeight, down, shade(lane, 0.3))
         return
       }
-      const rows = Math.floor(laneHeight / step.y)
+      // stacked layers get smaller dots, so they're told apart by more than colour
+      const pad = stack && lane ? 0.3 : 0.2
+      const size = 1 - 2 * pad
       shown.forEach((v, i) => {
         const x = box.width - (shown.length - i) * step.x
-        const filled = Math.round((Math.min(v, ceiling) / ceiling) * rows)
-        for (let r = 0; r < filled; r++) {
+        for (let r = toRows(floor[i]); r < toRows(v); r++) {
           ctx.fillStyle = shade(lane, r / rows)
           const y = down ? base + r * step.y : base - (r + 1) * step.y
-          ctx.fillRect(x + step.x * 0.2, y + step.y * 0.2, step.x * 0.6, step.y * 0.6)
+          ctx.fillRect(x + step.x * pad, y + step.y * pad, step.x * size, step.y * size)
         }
       })
     })
@@ -98,6 +113,7 @@
   function drawLine(
     ctx: CanvasRenderingContext2D,
     values: number[],
+    floor: number[],
     columns: number,
     stepX: number,
     base: number,
@@ -114,8 +130,7 @@
     ctx.strokeStyle = colour
     ctx.lineWidth = 1.5
     ctx.stroke()
-    ctx.lineTo(x(values.length - 1), base)
-    ctx.lineTo(x(0), base)
+    for (let i = values.length - 1; i >= 0; i--) ctx.lineTo(x(i), y(floor[i]))
     ctx.globalAlpha = 0.18
     ctx.fillStyle = colour
     ctx.fill()
