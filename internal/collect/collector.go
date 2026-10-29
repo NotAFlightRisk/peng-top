@@ -13,6 +13,9 @@ import (
 	"time"
 
 	"github.com/NotAFlightRisk/peng-top/internal/logx"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/mem"
+	"github.com/shirou/gopsutil/v4/net"
 )
 
 // Snapshot is one reading of everything. A nil section means it couldn't be read
@@ -49,11 +52,11 @@ func New(env Env, interval time.Duration, keep int) *Collector {
 		subs:     map[chan []byte]struct{}{},
 		sources: []source{
 			{"cpu", (&cpuReader{env: env}).read},
-			{"memory", (&memReader{env: env}).read},
-			{"disk usage", (&mountReader{env: env}).read},
+			{"memory", (&memReader{env: env, swap: every[*mem.SwapMemoryStat]{period: 10 * time.Second}}).read},
+			{"disk usage", (&mountReader{env: env, parts: every[[]disk.PartitionStat]{period: 30 * time.Second}}).read},
 			{"disk io", (&diskIOReader{env: env}).read},
-			{"network", (&netReader{}).read},
-			{"sensors", readSensors},
+			{"network", (&netReader{ifaces: every[[]net.InterfaceStat]{period: 10 * time.Second}}).read},
+			{"sensors", (&sensorReader{}).read},
 			{"processes", (&procReader{env: env}).read},
 		},
 	}
@@ -141,6 +144,25 @@ func (c *Collector) Subscribe() (history []byte, feed <-chan []byte, cancel func
 		c.mu.Unlock()
 	}
 }
+
+// every reruns a slow read at most once a period, handing back the last result in between
+type every[T any] struct {
+	period time.Duration
+	next   time.Time
+	val    T
+	err    error
+}
+
+func (e *every[T]) get(read func() (T, error)) (T, error) {
+	if now := time.Now(); !now.Before(e.next) {
+		e.val, e.err = read()
+		e.next = now.Add(e.period)
+	}
+	return e.val, e.err
+}
+
+// stale makes the next get read afresh
+func (e *every[T]) stale() { e.next = time.Time{} }
 
 // pct is a percentage, sent with one decimal place
 type pct float64

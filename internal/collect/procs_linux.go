@@ -36,7 +36,7 @@ func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 		if _, err := strconv.Atoi(e.Name()); err != nil {
 			continue
 		}
-		stat, err := os.ReadFile(filepath.Join(root, e.Name(), "stat"))
+		stat, err := r.slurp(root + "/" + e.Name() + "/stat")
 		if err != nil {
 			continue
 		}
@@ -47,6 +47,20 @@ func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 		out = append(out, raw)
 	}
 	return out, nil
+}
+
+// slurp reads a small file into a buffer that the next call reuses
+func (r *procReader) slurp(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	if r.buf == nil {
+		r.buf = make([]byte, 4096)
+	}
+	n, err := f.Read(r.buf)
+	return r.buf[:n], err
 }
 
 // parseStat reads one /proc/<pid>/stat line
@@ -75,8 +89,10 @@ func parseStat(stat []byte, boot int64, page uint64) (rawProc, bool) {
 	return raw, true
 }
 
-func (r *procReader) describe(_ context.Context, pid int32) about {
-	dir := filepath.Join(r.env.HostPath("/proc"), strconv.Itoa(int(pid)))
+type procOS struct{ buf []byte }
+
+func (r *procReader) describe(_ context.Context, raw rawProc) about {
+	dir := filepath.Join(r.env.HostPath("/proc"), strconv.Itoa(int(raw.pid)))
 	var a about
 	status, _ := os.ReadFile(filepath.Join(dir, "status"))
 	for _, line := range strings.Split(string(status), "\n") {

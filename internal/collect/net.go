@@ -28,14 +28,23 @@ var virtualPrefixes = []string{
 	"awdl", "llw", "anpi", "gif", "stf", "bridge", "ap1", "isatap", "teredo",
 }
 
-type netReader struct{ prev map[string]net.IOCountersStat }
+type netReader struct {
+	prev   map[string]net.IOCountersStat
+	ifaces every[[]net.InterfaceStat]
+	names  int
+}
 
 func (r *netReader) read(ctx context.Context, s *Snapshot, elapsed float64) error {
 	counters, err := net.IOCountersWithContext(ctx, true)
 	if err != nil {
 		return err
 	}
-	ifaces, _ := net.InterfacesWithContext(ctx)
+	// interface details only change when the set of counters does, or now and then
+	if len(counters) != r.names {
+		r.ifaces.stale()
+		r.names = len(counters)
+	}
+	ifaces, _ := r.ifaces.get(func() ([]net.InterfaceStat, error) { return net.InterfacesWithContext(ctx) })
 	byName := map[string]net.InterfaceStat{}
 	for _, i := range ifaces {
 		byName[i.Name] = i

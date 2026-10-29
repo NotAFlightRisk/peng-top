@@ -15,7 +15,7 @@ concurrency:
 jobs:
   check:
     name: ${{ matrix.emoji }} ${{ matrix.label }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,6 +29,14 @@ jobs:
           - label: tests
             emoji: 🧪
             run: go test -race ./...
+          - label: tests on macOS
+            emoji: 🍎
+            os: macos-latest
+            run: go test -race ./...
+          - label: tests on Windows
+            emoji: 🪟
+            os: windows-latest
+            run: go test ./...
           - label: web
             emoji: 🖼️
             web: true

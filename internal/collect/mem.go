@@ -22,7 +22,10 @@ type Mem struct {
 	Limit     uint64 `json:"limit,omitempty"`
 }
 
-type memReader struct{ env Env }
+type memReader struct {
+	env  Env
+	swap every[*mem.SwapMemoryStat]
+}
 
 func (r *memReader) read(ctx context.Context, s *Snapshot, _ float64) error {
 	vm, err := mem.VirtualMemoryWithContext(ctx)
@@ -33,7 +36,8 @@ func (r *memReader) read(ctx context.Context, s *Snapshot, _ float64) error {
 		Total: vm.Total, Used: vm.Used, Available: vm.Available,
 		Cached: vm.Cached, Buffers: vm.Buffers, Free: vm.Free,
 	}
-	if swap, err := mem.SwapMemoryWithContext(ctx); !logx.Check("swap", err) {
+	swap, err := r.swap.get(func() (*mem.SwapMemoryStat, error) { return mem.SwapMemoryWithContext(ctx) })
+	if !logx.Check("swap", err) {
 		m.SwapTotal, m.SwapUsed = swap.Total, swap.Used
 	}
 	if r.env.Mode == ModeContainer {
