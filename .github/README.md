@@ -60,7 +60,7 @@ curl -fsSLO https://raw.githubusercontent.com/NotAFlightRisk/peng-top/main/docke
 docker compose up -d
 ```
 
-The image is also on DockerHub as [`notaflightrisk/peng-top`](https://hub.docker.com/r/notaflightrisk/peng-top), for `amd64`, `arm64` and `arm/v7`. On Docker Desktop (macOS and Windows) the "host" is Docker's own VM, so you'll want the binary there instead.
+The image is built for `amd64`, `arm64` and `arm/v7`. On Docker Desktop (macOS and Windows) the "host" is Docker's own VM, so you'll want the binary there instead.
 
 ### From a release, by hand
 
