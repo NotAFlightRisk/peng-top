@@ -91,7 +91,7 @@
 <style>
   .cpu-view {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 44ch), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 60ch), 1fr));
     gap: 1.25lh 2ch;
 
     &.compact {
@@ -112,7 +112,7 @@
 
   .cores {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(18ch, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18ch, 1fr));
     gap: 0 2ch;
 
     & :global(.meter) {
@@ -123,7 +123,7 @@
 
   .core-graphs {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(24ch, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 0.5lh 2ch;
   }
 

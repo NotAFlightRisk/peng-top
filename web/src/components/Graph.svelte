@@ -7,12 +7,14 @@
     max,
     tone = 'load',
     mirror = false,
+    scale,
   }: {
     series: number[][]
     label: string
     max?: number
     tone?: 'load' | 'series'
     mirror?: boolean
+    scale?: (n: number) => string
   } = $props()
 
   let canvas = $state<HTMLCanvasElement>()
@@ -120,6 +122,7 @@
 
 <div class="graph" bind:contentRect={size} role="img" aria-label={label}>
   <canvas bind:this={canvas} aria-hidden="true"></canvas>
+  {#if scale}<span class="graph-scale" aria-hidden="true">{mirror ? '±' : ''}{scale(ceiling)}</span>{/if}
   <span class="graph-probe" bind:this={probe} aria-hidden="true"></span>
 </div>
 
@@ -128,7 +131,6 @@
     position: relative;
     flex: 1 0 auto;
     block-size: var(--graph-height, 5lh);
-    max-block-size: 22lh;
     min-width: 0;
     background: var(--surface-sunken);
     border-radius: var(--radius);
@@ -140,6 +142,15 @@
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
+  }
+
+  .graph-scale {
+    position: absolute;
+    inset: 0 auto auto 0;
+    padding-inline: 0.5ch;
+    background: var(--surface-sunken);
+    color: var(--text-muted);
+    pointer-events: none;
   }
 
   .graph-probe {

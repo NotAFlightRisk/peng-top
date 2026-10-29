@@ -33,6 +33,7 @@
 html {
   font: var(--font-size) / var(--line) var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-variant-ligatures: none;
   background: var(--surface);
   color: var(--text);
   caret-color: var(--accent);

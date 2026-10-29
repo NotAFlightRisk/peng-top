@@ -21,6 +21,7 @@ export const nav = $state({ view: fromHash(), seenIssues: 0 })
 addEventListener('hashchange', () => (nav.view = fromHash()))
 
 export function go(view: View) {
+  nav.view = view
   location.hash = view
 }
 

@@ -56,14 +56,27 @@
   {/snippet}
 
   <Panel title="look">
-    <label class="setting-row">
-      <span class="setting-name">theme</span>
-      <select class="setting-select" bind:value={settings.theme}>
+    <fieldset class="setting-row">
+      <legend>theme</legend>
+      <div class="themes">
         {#each themes as [name, label] (name)}
-          <option value={name}>{label}</option>
+          <label class="setting-option theme-option">
+            <input
+              class="visually-hidden"
+              type="radio"
+              name="theme"
+              checked={settings.theme === name}
+              onchange={() => (settings.theme = name)}
+            />
+            <span class="setting-mark" aria-hidden="true"></span>
+            <span class="swatch" data-theme={name === 'auto' ? 'peng' : name} aria-hidden="true">
+              {#each ['accent', 'ok', 'warn', 'crit', 'info'] as role (role)}<i style:background="var(--{role})"></i>{/each}
+            </span>
+            {label}
+          </label>
         {/each}
-      </select>
-    </label>
+      </div>
+    </fieldset>
     {@render choices(look)}
   </Panel>
 
@@ -121,8 +134,7 @@
     border: 0;
     min-width: 0;
 
-    & legend,
-    .setting-name {
+    & legend {
       float: left;
       inline-size: 13ch;
       padding: 0;
@@ -176,15 +188,27 @@
     }
   }
 
-  .setting-select {
-    padding: 0 1ch;
-    border: var(--border-width) solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface-sunken);
+  .themes {
+    display: grid;
+  }
 
-    &:focus-visible {
-      outline: none;
-      border-color: var(--accent);
+  .theme-option {
+    display: flex;
+    align-items: center;
+  }
+
+  /* each swatch wears its own theme, so these are that theme's colours */
+  .swatch {
+    display: inline-flex;
+    gap: 0.25ch;
+    margin-right: 1ch;
+    padding: 0.2lh 0.5ch;
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+
+    & i {
+      inline-size: 1ch;
+      block-size: 1ch;
     }
   }
 

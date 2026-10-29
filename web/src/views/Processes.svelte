@@ -291,6 +291,10 @@
     }
   }
 
+  .proc-pick {
+    display: inline;
+  }
+
   .proc-cmd {
     margin-inline-start: 1ch;
   }

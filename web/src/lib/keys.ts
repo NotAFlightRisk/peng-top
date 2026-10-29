@@ -1,3 +1,4 @@
+import { tick } from 'svelte'
 import { go, nav, step, views } from './nav.svelte'
 import { sortBy, table } from './procs.svelte'
 import { settings, themes } from './settings.svelte'
@@ -61,14 +62,14 @@ export function onKey(e: KeyboardEvent) {
   if (pressing && (e.key === ' ' || e.key === 'Enter')) return
 
   const key = e.key === ' ' ? 'Space' : e.key
-  const procs = nav.view === 'processes' || nav.view === 'overview'
+  const procs = nav.view === 'processes'
   const digit = Number(key)
   if (digit >= 1 && digit <= views.length) go(views[digit - 1])
   else if (key === 'ArrowRight' || key === 'l') step(1)
   else if (key === 'ArrowLeft' || key === 'h') step(-1)
   else if (key === '/') {
     go('processes')
-    requestAnimationFrame(() => document.getElementById('proc-filter')?.focus())
+    tick().then(() => document.getElementById('proc-filter')?.focus())
   } else if (procs && (key === 'j' || key === 'ArrowDown')) move(1)
   else if (procs && (key === 'k' || key === 'ArrowUp')) move(-1)
   else if (nav.view === 'processes' && sortKeys[key]) sortBy(sortKeys[key])

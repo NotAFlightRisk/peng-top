@@ -113,6 +113,10 @@
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     min-height: 100dvh;
+
+    @media (min-width: 40.01rem) {
+      height: 100dvh;
+    }
   }
 
   .topbar {
@@ -241,6 +245,11 @@
     align-content: start;
     padding: 1lh 2ch;
     min-width: 0;
+    overflow: auto;
+
+    &:has(> :global(.overview)) {
+      align-content: stretch;
+    }
   }
 
   .waiting {
@@ -275,6 +284,10 @@
 
     .keybar {
       display: none;
+    }
+
+    .tabs {
+      flex-wrap: wrap;
     }
   }
 </style>

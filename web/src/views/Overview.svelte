@@ -27,8 +27,8 @@
 <div class="overview">
   {#if show.cpu}<Cpu compact />{/if}
   {#if show.memory}<Memory compact />{/if}
-  {#if show.network}<Network compact />{/if}
   {#if show.disks}<Disks compact />{/if}
+  {#if show.network}<Network compact />{/if}
   {#if show.sensors && stream.latest?.sensors}<Sensors compact />{/if}
   {#if show.processes && procs}
     <Panel title="busiest" hotkey="7" aside={procCount} class="overview-procs">
@@ -63,6 +63,18 @@
     grid-auto-flow: row dense;
     gap: 1.25lh 2ch;
     container-type: inline-size;
+
+    @media (min-width: 40.01rem) {
+      grid-auto-rows: minmax(min-content, 1fr);
+      min-block-size: 100%;
+    }
+  }
+
+  @container (max-width: 60ch) {
+    .overview :global(.graph) {
+      --graph-height: 3lh;
+      flex-grow: 0;
+    }
   }
 
   @container (min-width: 96ch) {

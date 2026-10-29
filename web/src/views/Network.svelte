@@ -31,15 +31,12 @@
   </p>
 {/snippet}
 
-{#snippet virtualToggle()}
-  <label class="toggle"><input type="checkbox" bind:checked={settings.showVirtual} /> virtual</label>
-{/snippet}
 
 <div class="network-view" class:compact>
   {#if compact}
     <Panel title="network" hotkey="5">
       {#if stream.latest?.net}
-        <Graph series={traffic()} tone="series" mirror label={describe('all traffic', totals.rx, totals.tx)} />
+        <Graph series={traffic()} tone="series" mirror scale={speed} label={describe('all traffic', totals.rx, totals.tx)} />
         {@render legend(totals.rx, totals.tx)}
         {#each nics as n (n.name)}
           <p class="nic-line">
@@ -55,19 +52,25 @@
   {:else if !stream.latest?.net}
     <Panel title="network"><Unavailable area="network" what="network readings" /></Panel>
   {:else}
+    <div class="network-tools">
+      <button class="toggle" aria-pressed={settings.showVirtual} onclick={() => (settings.showVirtual = !settings.showVirtual)}>
+        <span class="toggle-mark" aria-hidden="true">{settings.showVirtual ? '[x]' : '[ ]'}</span>
+        show virtual interfaces <span class="muted">(lo, docker, veth)</span>
+      </button>
+    </div>
     {#each nics as n (n.name)}
       {@render nicPanel(n)}
     {:else}
-      <Panel title="network" aside={virtualToggle}>
-        <p class="muted">only virtual interfaces here, tick virtual to see them</p>
+      <Panel title="network">
+        <p class="muted">only virtual interfaces here, tick the box above to see them</p>
       </Panel>
     {/each}
   {/if}
 </div>
 
 {#snippet nicPanel(n: NIC)}
-  <Panel title={n.name} aside={n === nics[0] ? virtualToggle : undefined} class={n.up ? '' : 'nic-down'}>
-    <Graph series={traffic(n.name)} tone="series" mirror label={describe(n.name, n.rx, n.tx)} />
+  <Panel title={n.name} class={n.up ? 'nic' : 'nic nic-down'}>
+    <Graph series={traffic(n.name)} tone="series" mirror scale={speed} label={describe(n.name, n.rx, n.tx)} />
     {@render legend(n.rx, n.tx)}
     <dl class="nic-facts">
       <dt class="muted">state</dt>
@@ -138,8 +141,28 @@
     font-weight: 700;
   }
 
+  .network-tools {
+    grid-column: 1 / -1;
+  }
+
   .toggle {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
     cursor: pointer;
+
+    &[aria-pressed='true'] {
+      color: var(--text);
+
+      & .toggle-mark {
+        color: var(--accent);
+      }
+    }
+  }
+
+  .network-view :global(.nic .graph) {
+    flex-grow: 0;
   }
 
   .network-view :global(.nic-down) {

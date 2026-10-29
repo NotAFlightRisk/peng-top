@@ -76,6 +76,7 @@
           series={[ioHistory(d.name, 'read'), ioHistory(d.name, 'write')]}
           tone="series"
           mirror
+          scale={speed}
           label="{d.name} reads above the line and writes below, now {speed(d.read)} read and {speed(d.write)} written"
         />
         <p class="io-legend">
