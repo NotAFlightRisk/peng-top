@@ -62,7 +62,7 @@ func (r *procReader) list(context.Context) ([]rawProc, error) {
 			out = append(out, rawProc{
 				pid:     int32(p.UniqueProcessID),
 				ppid:    int32(p.InheritedFromUniqueProcessID),
-				name:    p.ImageName.String(),
+				name:    imageName(table, &p.ImageName),
 				started: max(p.CreateTime-filetimeEpoch, 0) / 10_000,
 				cpuSecs: float64(p.UserTime+p.KernelTime) / 1e7,
 				rss:     uint64(p.WorkingSetSize),
@@ -71,12 +71,23 @@ func (r *procReader) list(context.Context) ([]rawProc, error) {
 				kernel:  p.UniqueProcessID == 4,
 			})
 		}
-		if p.NextEntryOffset == 0 {
+		next := int(p.NextEntryOffset)
+		if next < procInfoSize || next%8 != 0 {
 			break
 		}
-		at += int(p.NextEntryOffset)
+		at += next
 	}
 	return out, nil
+}
+
+// imageName copies the name, as long as it really points inside the table
+func imageName(table []byte, s *windows.NTUnicodeString) string {
+	start := uintptr(unsafe.Pointer(s.Buffer)) - uintptr(unsafe.Pointer(&table[0]))
+	if s.Buffer == nil || s.Length%2 != 0 || s.Length > s.MaximumLength ||
+		start > uintptr(len(table)) || uintptr(s.Length) > uintptr(len(table))-start {
+		return ""
+	}
+	return s.String()
 }
 
 // threadsState is running if any thread is on a cpu or queued for one

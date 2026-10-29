@@ -44,7 +44,12 @@ func (r *netReader) read(ctx context.Context, s *Snapshot, elapsed float64) erro
 		r.ifaces.stale()
 		r.names = len(counters)
 	}
-	ifaces, _ := r.ifaces.get(func() ([]net.InterfaceStat, error) { return net.InterfacesWithContext(ctx) })
+	ifaces, _ := r.ifaces.get(func() ([]net.InterfaceStat, error) {
+		if got, err := net.InterfacesWithContext(ctx); err == nil {
+			return got, nil
+		}
+		return r.ifaces.val, nil
+	})
 	byName := map[string]net.InterfaceStat{}
 	for _, i := range ifaces {
 		byName[i.Name] = i
