@@ -87,8 +87,7 @@ var (
 	issues   = map[string]string{}
 )
 
-// Check records whether a metric area is working. Returns true if err is a failure.
-// A new failure warns once, repeats stay at debug, and recovery gets a cheery info line
+// Check records whether an area works, warning once per new failure, and says if err was one
 func Check(area string, err error) bool {
 	issuesMu.Lock()
 	prev, failing := issues[area]

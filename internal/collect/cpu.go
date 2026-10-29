@@ -86,7 +86,7 @@ func (r *cpuReader) mhz(ctx context.Context) float64 {
 	return sum / float64(len(infos))
 }
 
-// busy leaves out guest time, since linux already counts it inside user
+// busy is non-idle time, minus guest which user already includes
 func busy(t cpu.TimesStat) float64 {
 	return t.User + t.Nice + t.System + t.Irq + t.Softirq + t.Steal
 }

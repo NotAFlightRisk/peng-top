@@ -197,7 +197,7 @@
     align-items: center;
   }
 
-  /* each swatch wears its own theme, so these are that theme's colours */
+  /* each swatch wears its own theme's colours */
   .swatch {
     display: inline-flex;
     gap: 0.25ch;

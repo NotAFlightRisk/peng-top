@@ -1,4 +1,4 @@
-/* every theme sets the same roles, so swapping one only ever changes values */
+/* every theme sets the same roles */
 :root,
 [data-theme='peng'] {
   color-scheme: dark;

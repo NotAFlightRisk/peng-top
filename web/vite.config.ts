@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
-// go:embed needs dist to exist in a fresh clone, so the build puts the placeholder back
+// puts back the placeholder go:embed needs in dist
 const keepDist = { name: 'keep-dist', closeBundle: () => writeFileSync('dist/.gitkeep', '') }
 
 export default defineConfig({

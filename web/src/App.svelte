@@ -148,7 +148,7 @@
     text-decoration: none;
   }
 
-  /* a warn block in front rather than warn text, so it reads in every theme */
+  /* a warn block in front of the label */
   .mode-container,
   .issues.unseen {
     display: inline-flex;

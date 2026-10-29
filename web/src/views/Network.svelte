@@ -140,8 +140,8 @@
   }
 
   .bad {
-    color: var(--crit);
     font-weight: 700;
+    text-decoration: underline wavy var(--crit);
   }
 
   .network-tools {

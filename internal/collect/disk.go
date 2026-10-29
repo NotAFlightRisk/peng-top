@@ -37,7 +37,7 @@ type DiskIO struct {
 	WriteTotal uint64 `json:"writeTotal"`
 }
 
-// snaps, squashfs images and friends that'd only clutter the list
+// filesystems left off the list: snaps, squashfs images and friends
 var skipFS = []string{"squashfs", "overlay", "tmpfs", "devtmpfs", "iso9660", "nsfs", "tracefs"}
 
 type mountReader struct{ env Env }
@@ -78,7 +78,7 @@ func (r *mountReader) read(ctx context.Context, s *Snapshot, _ float64) error {
 	return nil
 }
 
-// macOS mounts half a dozen system volumes nobody wants to see, Data is the one that fills up
+// macOS system volumes, bar Data which is the one that fills up
 func macSystemVolume(path string) bool {
 	return strings.HasPrefix(path, "/System/Volumes/") && path != "/System/Volumes/Data"
 }
@@ -122,7 +122,7 @@ func (r *diskIOReader) read(ctx context.Context, s *Snapshot, elapsed float64) e
 	return nil
 }
 
-// busyShare only means anything on linux, where io_ticks is wall time the disk spent busy
+// busyShare is the share of wall time the disk was busy, linux only
 func busyShare(now, before uint64, elapsed float64) *pct {
 	if runtime.GOOS != "linux" {
 		return nil
@@ -131,7 +131,7 @@ func busyShare(now, before uint64, elapsed float64) *pct {
 	return &busy
 }
 
-// wholeDisk drops partitions and loop/ram devices on linux, so a disk isn't counted twice
+// wholeDisk drops partitions and loop/ram devices on linux
 func (r *diskIOReader) wholeDisk(name string) bool {
 	if runtime.GOOS != "linux" {
 		return true

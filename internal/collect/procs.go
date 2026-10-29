@@ -43,7 +43,7 @@ type rawProc struct {
 	kernel    bool
 }
 
-// about is what never changes for a process, so it's only read once
+// about is what never changes for a process, read once per pid
 type about struct {
 	name, cmd, user string
 }
@@ -54,7 +54,7 @@ type tracked struct {
 	cpuSecs float64
 }
 
-// long enough to tell two java processes apart, short enough not to ship someone's whole prompt
+// command lines past this get the chop
 const maxCmd = 300
 
 type procReader struct {
@@ -106,7 +106,7 @@ func (r *procReader) read(ctx context.Context, s *Snapshot, elapsed float64) err
 	return nil
 }
 
-// username checks the host's passwd first (we might be in a container), then the OS
+// username checks the host's passwd, then the OS
 func (r *procReader) username(uid uint32) string {
 	if r.users == nil {
 		r.users = readPasswd(r.env.HostPath("/etc/passwd"))

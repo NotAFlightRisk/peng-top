@@ -25,6 +25,15 @@
   }
 
   .unavailable-what {
-    color: var(--warn);
+    display: inline-flex;
+    align-items: center;
+    gap: 1ch;
+
+    &::before {
+      content: '';
+      inline-size: 1ch;
+      block-size: 1ch;
+      background: var(--warn);
+    }
   }
 </style>

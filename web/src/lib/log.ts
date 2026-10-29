@@ -15,7 +15,7 @@ const debugOn = () => {
   }
 }
 
-// the only door to the console, so logs stay tidy and debug stays opt-in
+// the only door to the console, debug shows when peng-top:debug is set
 export function log(level: Level, message: string, detail?: unknown) {
   if (level === 'debug' && !debugOn()) return
   const time = new Date().toLocaleTimeString()

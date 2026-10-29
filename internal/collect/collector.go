@@ -111,7 +111,7 @@ func (c *Collector) sample(ctx context.Context, elapsed float64, publish bool) {
 		"bytes", len(full))
 }
 
-// safely turns a panic in one reader into an error, so the rest keep going
+// safely turns a panic in one reader into an error
 func safely(read func() error) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -142,7 +142,7 @@ func (c *Collector) Subscribe() (history []byte, feed <-chan []byte, cancel func
 	}
 }
 
-// pct is a percentage, and nobody needs more than one decimal place of one
+// pct is a percentage, sent with one decimal place
 type pct float64
 
 func (p pct) MarshalJSON() ([]byte, error) {

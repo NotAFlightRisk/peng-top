@@ -121,7 +121,7 @@ kbd {
   }
 }
 
-/* legend swatches, so the series colours never have to pass as text */
+/* legend swatches in the series colours */
 .key-a,
 .key-b {
   display: inline-flex;

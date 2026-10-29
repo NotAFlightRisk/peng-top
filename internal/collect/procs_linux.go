@@ -11,7 +11,7 @@ import (
 	"github.com/shirou/gopsutil/v4/host"
 )
 
-// linux reports cpu time in clock ticks, which has been 100 a second everywhere for decades
+// clock ticks a second, which is USER_HZ on every arch we ship
 const ticks = 100
 
 var states = map[byte]string{
@@ -19,7 +19,7 @@ var states = map[byte]string{
 	'T': "stop", 't': "stop", 'I': "idle", 'X': "dead",
 }
 
-// list reads one stat file per process, which is about a tenth of what gopsutil does
+// list reads one stat file per process
 func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 	root := r.env.HostPath("/proc")
 	entries, err := os.ReadDir(root)
@@ -51,7 +51,7 @@ func (r *procReader) list(ctx context.Context) ([]rawProc, error) {
 
 // parseStat reads one /proc/<pid>/stat line
 func parseStat(stat []byte, boot int64, page uint64) (rawProc, bool) {
-	// comm can hold spaces and brackets, so the fields start after the last one
+	// fields start after the last bracket, as comm can hold spaces and brackets
 	start, end := bytes.IndexByte(stat, ' '), bytes.LastIndexByte(stat, ')')
 	if start < 0 || end < start {
 		return rawProc{}, false
@@ -94,7 +94,7 @@ func (r *procReader) describe(_ context.Context, pid int32) about {
 	cmdline, _ := os.ReadFile(filepath.Join(dir, "cmdline"))
 	args := strings.Split(strings.TrimRight(string(cmdline), "\x00"), "\x00")
 	a.cmd = clip(strings.Join(args, " "))
-	// the kernel cuts names at 15 characters, so borrow the full one from argv when it fits
+	// names stop at 15 characters, so the full one comes from argv when it fits
 	if exe := filepath.Base(args[0]); len(a.name) == 15 && strings.HasPrefix(exe, a.name) {
 		a.name = exe
 	}

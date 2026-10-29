@@ -23,8 +23,7 @@
 
   const ceiling = $derived(max ?? niceMax(Math.max(1, ...series.flat()), settings.binary ? 1024 : 1000))
 
-  // rounds up to 1, 2 or 5 times a power of ten in whatever unit it lands in, so the scale
-  // reads 50 KiB/s rather than 48.8, and doesn't wobble every tick
+  // rounds up to 1, 2 or 5 times a power of ten in the peak's display unit
   function niceMax(peak: number, base: number) {
     const unit = base ** Math.floor(Math.log(peak) / Math.log(base))
     const inUnit = peak / unit

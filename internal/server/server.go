@@ -122,8 +122,7 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// guard turns away Host headers we don't know, so a DNS rebinding page can't read us.
-// With a login set the browser won't hand it to a stranger anyway, so it steps aside
+// guard turns away unknown Host headers, unless there's a login or * is allowed
 func (s *Server) guard(next http.Handler) http.Handler {
 	if s.cfg.Auth != "" || s.hosts["*"] {
 		return next
