@@ -54,3 +54,4 @@ release:
     owner: NotAFlightRisk
     name: peng-top
   mode: keep-existing
+  use_existing_draft: true
