@@ -47,6 +47,7 @@ jobs:
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 ||
           gh release create "$TAG" \
             --title "$TAG" \
+            --draft \
             --generate-notes \
             --verify-tag \
             --repo "$GITHUB_REPOSITORY"
