@@ -3,7 +3,7 @@ module github.com/NotAFlightRisk/peng-top
 go 1.26.5
 
 require (
-	github.com/ebitengine/purego v0.11.2
+	github.com/ebitengine/purego v0.11.3
 	github.com/shirou/gopsutil/v4 v4.26.10
 	golang.org/x/sys v0.49.0
 )
